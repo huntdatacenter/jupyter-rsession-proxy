@@ -9,6 +9,12 @@ from urllib.parse import urlparse, urlunparse
 
 
 def get_rstudio_executable(prog):
+    if os.getenv('RSTUDIO_BIN_DIR'):
+        return os.path.join(os.getenv('RSTUDIO_BIN_DIR'), prog)
+    else:
+        return find_rstudio_executable(prog)
+
+def find_rstudio_executable(prog):
     # Find prog in known locations
     other_paths = [
         # When rstudio-server deb is installed
