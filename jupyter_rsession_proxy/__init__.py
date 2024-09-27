@@ -91,27 +91,31 @@ def setup_rserver():
 
     def _get_cmd(port):
         try:
-            ntf = tempfile.NamedTemporaryFile(prefix='rserver-', dir=os.path.join(
+            tmp_dir = os.path.join(
                 os.getenv(
                     'RSTUDIO_PROXY_TMPDIR',
                     default=os.path.join(os.getenv('HOME'), '.cache', 'rserver')
                 ),
                 'keys'
-            ))
+            )
+            os.makedirs(tmp_dir, mode=0o700, exist_ok=True)
+            ntf = tempfile.NamedTemporaryFile(prefix='rserver-', dir=tmp_dir)
         except Exception:
             ntf = tempfile.NamedTemporaryFile(prefix='rserver-')
 
         # use mkdtemp() so the directory and its contents don't vanish when
         # we're out of scope
         try:
-            # TODO -- consider data_dir based on container hostname
-            server_data_dir = tempfile.mkdtemp(prefix='rserver-', dir=os.path.join(
+            tmp_dir = os.path.join(
                 os.getenv(
                     'RSTUDIO_PROXY_TMPDIR',
                     default=os.path.join(os.getenv('HOME'), '.cache', 'rserver')
                 ),
                 'data'
-            ))
+            )
+            os.makedirs(tmp_dir, mode=0o700, exist_ok=True)
+            # TODO -- consider data_dir based on container hostname
+            server_data_dir = tempfile.mkdtemp(prefix='rserver-', dir=tmp_dir)
         except Exception:
             server_data_dir = tempfile.mkdtemp(prefix='rserver-')
         database_config_file = db_config(server_data_dir)
