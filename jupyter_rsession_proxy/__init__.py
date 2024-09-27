@@ -89,18 +89,31 @@ def setup_rserver():
         except Exception:
             return default
 
-    def _get_www_frame_origin(default="same"):
-        try:
-            return os.getenv('JUPYTER_RSESSION_PROXY_WWW_FRAME_ORIGIN', default)
-        except Exception:
-            return default
-
     def _get_cmd(port):
-        ntf = tempfile.NamedTemporaryFile()
+        try:
+            ntf = tempfile.NamedTemporaryFile(prefix='rserver-', dir=os.path.join(
+                os.getenv(
+                    'RSTUDIO_PROXY_TMPDIR',
+                    default=os.path.join(os.getenv('HOME'), '.cache', 'rserver')
+                ),
+                'keys'
+            ))
+        except Exception:
+            ntf = tempfile.NamedTemporaryFile(prefix='rserver-')
 
         # use mkdtemp() so the directory and its contents don't vanish when
         # we're out of scope
-        server_data_dir = tempfile.mkdtemp()
+        try:
+            # TODO -- consider data_dir based on container hostname
+            server_data_dir = tempfile.mkdtemp(prefix='rserver-', dir=os.path.join(
+                os.getenv(
+                    'RSTUDIO_PROXY_TMPDIR',
+                    default=os.path.join(os.getenv('HOME'), '.cache', 'rserver')
+                ),
+                'data'
+            ))
+        except Exception:
+            server_data_dir = tempfile.mkdtemp(prefix='rserver-')
         database_config_file = db_config(server_data_dir)
 
         cmd = [
